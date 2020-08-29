@@ -1,0 +1,35 @@
+## COMMON ##
+USE_CUDA: True
+MODEL: Wavegram_Logmel_Cnn14
+CKPT_PATH: "checkpoints/model.pth"
+
+## TRAIN ##
+# random seed
+DETERMINISTIC: True
+SEED: 0
+
+# model
+PRETRAINED_PATH: "audioset_tagging_cnn/Wavegram_Logmel_Cnn14_mAP=0.439.pth"
+TRAIN_LAYERS:
+  - conv_block5
+  - conv_block6
+  - fc1
+  - fc_audioset
+
+# dataset
+SANITY_CHECK: False
+TRAIN_SIZE: 0.8
+LIKELIHOOD: [0, 1, 1]
+AUDIO_DURATION: 5.0
+
+# optimization
+LOSS: SoftF1Loss
+BATCH_SIZE: 32
+EPOCHS: 1000
+OPTIM_ALGO: Adam
+LR: 0.001
+
+## TEST ##
+PRED_THRESH: 0.5
+WINDOW_SIZE: 5.0
+STRIDE: 5.0

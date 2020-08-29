@@ -1,3 +1,5 @@
 .sge_request
 __pycache__
-data
+data/
+runs/
+checkpoints/
