@@ -14,7 +14,10 @@ import losses
 
 def get_loader(df, cfg):
     dataset =  BirdcallDataset(df, cfg['LIKELIHOOD'], cfg['AUDIO_DURATION'])
-    kwargs = {'num_workers': 1, 'pin_memory': True} if cfg['USE_CUDA'] else {}
+    kwargs = {
+        'num_workers': cfg['NUM_WORKERS'],
+        'pin_memory': True
+    } if cfg['USE_CUDA'] else {}
     loader = DataLoader(dataset, cfg['BATCH_SIZE'], kwargs)
     return loader
 
