@@ -1,11 +1,9 @@
 ### Prepare
 * Download all data from https://www.kaggle.com/c/birdsong-recognition/data and put them under `data/`.
-* Run the following to resample training audio files. It will take long!
+* Run the following to resample and convert training audio files. It will take about an hour.
   ```bash
-  for audio in data/train_audio/*/*; do
-    tmp=tmp.mp3
-    ffmpeg -i $audio -ar 32000 $tmp
-    mv $tmp $audio
+  for audio in data/train_audio/*/*.mp3; do
+    ffmpeg -i $audio -ar 32000 -ac 1 ${audio%.mp3}.wav
   done
   ```
 * Download a whatever PANN pretrained model from [here](https://zenodo.org/record/3987831#.X0j3PdMzblw) and put it under `audioset_tagging_cnn/`. Modify `configs/default.yaml` accordingly. If your downloaded model is `Wavegram_Logmel_Cnn14_mAP=0.439.pth`, you don't have to edit the config file.

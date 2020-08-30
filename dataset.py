@@ -1,27 +1,28 @@
 from torch.utils.data import Dataset
 import os
 import random
-import librosa
-import warnings
+import soundfile as sf
 import numpy as np
 
 class BirdcallDataset(Dataset):
-    def __init__(self, df, likelihood=[0,1], duration=5., sr=32000, data_dir='data'):
+    def __init__(self, df, likelihood=[0,1], duration=5.):
         super().__init__()
-        self.df = df[['ebird_code', 'filename']]
+        self.df = df
         self.likelihood = likelihood
-        self.sr = sr
         self.duration = duration
-        self.data_dir = data_dir
+        self.sr = 32000
+        self.data_dir = 'data'
+        self.len = len(self.df)
 
         # save some frequently used objects
-        self.train_audio_dir = os.path.join(data_dir, 'train_audio')
+        self.train_audio_dir = os.path.join(self.data_dir, 'train_audio')
         self.bird_list = sorted(os.listdir(self.train_audio_dir))
         self.num_birds = len(self.bird_list)
 
         # get list of list of available audio files from df
         self.available_audios = [
-            self.df[df['ebird_code']==bird]['filename'].tolist()
+            [os.path.splitext(file)[0] + '.wav'
+                for file in self.df.loc[df['ebird_code']==bird, 'filename']]
             for bird in self.bird_list
         ]
 
@@ -31,6 +32,9 @@ class BirdcallDataset(Dataset):
             idx for idx in range(self.num_birds) if self.available_audios[idx]
         ]
 
+        # for now there's no further use of self.df
+        del(self.df)
+
     def _get_random_interval(self, bird_id):
         '''
         Get random audio of bird_id
@@ -38,14 +42,10 @@ class BirdcallDataset(Dataset):
         Return audio array of length self.sr * self.duration.
         '''
         audio_file = random.choice(self.available_audios[bird_id])
-        # audio_file = audio_file[:-4] + '.wav'
         audio_path = os.path.join(self.train_audio_dir,
                                   self.bird_list[bird_id], audio_file)
-
-        # turn off warnings when loading mp3 with librosa... what a dirty hack!
-        warnings.simplefilter('ignore')
-        y, _ = librosa.load(audio_path, self.sr)
-        warnings.resetwarnings()
+        y, _ = sf.read(audio_path)
+        y = y.astype(np.float32)
 
         len_y = len(y)
         interval_length = int(self.sr * self.duration)
@@ -66,7 +66,7 @@ class BirdcallDataset(Dataset):
 
     def __len__(self):
         # rough length
-        return len(self.df)
+        return self.len
 
     def __getitem__(self, index: int):
         # NOTE: index not used since this is randomized!
