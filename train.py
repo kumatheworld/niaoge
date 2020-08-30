@@ -96,8 +96,7 @@ def train(cfg):
         writer.add_scalars('score/train & val',
                            {'train': train_score, 'val': val_score}, epoch)
 
-        # save model
-        if best_score <= val_score:
+        if best_score <= val_score and not cfg['SANITY_CHECK']:
             best_score = val_score
             checkpoint = {
                 'epoch': epoch,
