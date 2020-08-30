@@ -19,7 +19,7 @@ def fix_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def prepare_model(train, Model, ckpt_path, train_layers, device):
+def prepare_model(train, Model, ckpt_path, train_from, device):
     # load a PANN model
     num_classes_audioset = 527
     num_birds = 264
@@ -30,9 +30,6 @@ def prepare_model(train, Model, ckpt_path, train_layers, device):
                   classes_num=num_classes_audioset if train else num_birds)
     model.load_state_dict(ckpt['model'])
 
-    for param in model.parameters():
-        param.requires_grad = False
-
     if train:
         hidden_size = 2048
         # replace the final layer
@@ -42,10 +39,10 @@ def prepare_model(train, Model, ckpt_path, train_layers, device):
         else:
             model.fc_audioset = nn.Linear(hidden_size, num_birds, 'sigmoid')
 
-        for layer_name in train_layers:
-            layer = getattr(model, layer_name)
-            for param in layer.parameters():
-                param.requires_grad = True
+        for name, param in model.named_parameters():
+            if train_from in name:
+                break
+            param.requires_grad = False
 
     model.to(device)
 
@@ -72,7 +69,7 @@ def set_config(config_name, train):
 
     Model = getattr(audioset_tagging_cnn.pytorch.models, cfg['MODEL'])
     ckpt_path = cfg['PRETRAINED_PATH'] if train else cfg['CKPT_PATH']
-    model = prepare_model(train, Model, ckpt_path, cfg['TRAIN_LAYERS'], device)
+    model = prepare_model(train, Model, ckpt_path, cfg['TRAIN_FROM'], device)
     cfg['MODEL'] = model
 
     return cfg

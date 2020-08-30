@@ -10,12 +10,7 @@ SEED: 0
 
 # model
 PRETRAINED_PATH: "audioset_tagging_cnn/Wavegram_Logmel_Cnn14_mAP=0.439.pth"
-TRAIN_LAYERS:
-  - conv_block4
-  - conv_block5
-  - conv_block6
-  - fc1
-  - fc_audioset
+TRAIN_FROM: pre_conv0
 
 # dataset
 VALIDATION: False
