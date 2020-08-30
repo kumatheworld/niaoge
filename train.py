@@ -29,9 +29,13 @@ def train(cfg):
     if cfg['SANITY_CHECK']:
         df = df.drop_duplicates(subset=['ebird_code'])
 
-    train_df, test_df = train_test_split(df, train_size=cfg['TRAIN_SIZE'])
-    train_loader = get_loader(train_df, cfg)
-    val_loader = get_loader(test_df, cfg)
+    if cfg['VALIDATION']:
+        train_df, test_df = train_test_split(df)
+        train_loader = get_loader(train_df, cfg)
+        val_loader = get_loader(test_df, cfg)
+    else:
+        train_loader = get_loader(df, cfg)
+        val_loader = None
 
     # prepare some more
     criterion = getattr(losses, cfg['LOSS'])
@@ -79,26 +83,28 @@ def train(cfg):
         train_score /= len(train_loader)
 
         # validate
-        model.eval()
-        val_loss = 0
         val_score = 0
-        with torch.no_grad():
-            for data, label in val_loader:
-                data = data.to(device)
-                label = label.to(device)
+        val_loss = 0
+        if cfg['VALIDATION']:
+            model.eval()
+            with torch.no_grad():
+                for data, label in val_loader:
+                    data = data.to(device)
+                    label = label.to(device)
 
-                pred = model(data)['clipwise_output']
-                val_loss += criterion(pred, label).item()
-                pred_bin = binarize(pred, cfg['PRED_THRESH'])
-                val_score += mean_f1_score(label, pred_bin)
+                    pred = model(data)['clipwise_output']
+                    val_loss += criterion(pred, label).item()
+                    pred_bin = binarize(pred, cfg['PRED_THRESH'])
+                    val_score += mean_f1_score(label, pred_bin)
 
-        val_loss /= len(val_loader)
-        val_score /= len(val_loader)
-        writer.add_scalars('loss/train & val',
-                           {'train': train_loss, 'val': val_loss}, epoch)
-        writer.add_scalars('score/train & val',
-                           {'train': train_score, 'val': val_score}, epoch)
+            val_loss /= len(val_loader)
+            val_score /= len(val_loader)
+            writer.add_scalars('loss/train & val',
+                            {'train': train_loss, 'val': val_loss}, epoch)
+            writer.add_scalars('score/train & val',
+                            {'train': train_score, 'val': val_score}, epoch)
 
+        # save model
         if best_score <= val_score and not cfg['SANITY_CHECK']:
             best_score = val_score
             checkpoint = {
