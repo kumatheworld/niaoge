@@ -18,7 +18,7 @@ TRAIN_LAYERS:
   - fc_audioset
 
 # dataset
-SANITY_CHECK: False
+SANITY_CHECK: True
 TRAIN_SIZE: 0.8
 LIKELIHOOD: [0, 1, 1]
 AUDIO_DURATION: 5.0
