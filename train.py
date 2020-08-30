@@ -72,8 +72,8 @@ def train(cfg):
 
             n_iter += 1
 
-        train_loss /= len(val_loader.dataset)
-        train_score /= len(val_loader.dataset)
+        train_loss /= len(train_loader)
+        train_score /= len(train_loader)
 
         # validate
         model.eval()
@@ -89,8 +89,8 @@ def train(cfg):
                 pred_bin = binarize(pred, cfg['PRED_THRESH'])
                 val_score += mean_f1_score(label, pred_bin)
 
-        val_loss /= len(val_loader.dataset)
-        val_score /= len(val_loader.dataset)
+        val_loss /= len(val_loader)
+        val_score /= len(val_loader)
         writer.add_scalars('loss/train & val',
                            {'train': train_loss, 'val': val_loss}, epoch)
         writer.add_scalars('score/train & val',
