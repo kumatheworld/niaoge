@@ -39,10 +39,13 @@ def train(cfg):
         [param for param in model.parameters() if param.requires_grad],
         lr=cfg['LR']
     )
+    ckpt_dir = os.path.dirname(cfg['CKPT_PATH'])
+    os.makedirs(ckpt_dir, exist_ok=True)
     writer = SummaryWriter()
 
     # start training!
     n_iter = 1
+    best_score = 0
     for epoch in range(1, cfg['EPOCHS'] + 1):
         # train
         model.train()
@@ -93,10 +96,14 @@ def train(cfg):
         writer.add_scalars('score/train & val',
                            {'train': train_score, 'val': val_score}, epoch)
 
-    # save model
-    ckpt_dir = os.path.dirname(cfg['CKPT_PATH'])
-    os.makedirs(ckpt_dir, exist_ok=True)
-    torch.save(model.state_dict(), cfg['CKPT_PATH'])
+        # save model
+        if best_score <= val_score:
+            best_score = val_score
+            checkpoint = {
+                'epoch': epoch,
+                'model': model.state_dict(),
+            }
+            torch.save(checkpoint, cfg['CKPT_PATH'])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

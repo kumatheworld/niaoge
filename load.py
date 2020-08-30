@@ -28,7 +28,7 @@ def prepare_model(train, Model, ckpt_path, train_layers, device):
     model = Model(sample_rate=32000, window_size=1024,
                   hop_size=320, mel_bins=64, fmin=50, fmax=14000,
                   classes_num=num_classes_audioset if train else num_birds)
-    model.load_state_dict(ckpt['model'] if train else ckpt)
+    model.load_state_dict(ckpt['model'])
 
     for param in model.parameters():
         param.requires_grad = False
