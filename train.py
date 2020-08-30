@@ -70,6 +70,9 @@ def train(cfg):
             train_loss += loss_item
             train_score += score
 
+            if cfg['SANITY_CHECK']:
+                print(n_iter, loss_item, score)
+
             n_iter += 1
 
         train_loss /= len(train_loader)
