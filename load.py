@@ -59,7 +59,7 @@ def set_config(config_name, train):
     with open(config_path) as f:
         cfg = yaml.load(f, yaml.SafeLoader)
 
-    if train and cfg['DETERMINISTIC']:
+    if train and cfg['SEED']:
         fix_seed(cfg['SEED'])
 
     use_cuda = torch.cuda.is_available() and cfg['USE_CUDA']

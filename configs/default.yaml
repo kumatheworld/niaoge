@@ -5,8 +5,7 @@ CKPT_PATH: "checkpoints/model.pth"
 
 ## TRAIN ##
 # random seed
-DETERMINISTIC: True
-SEED: 0
+SEED:
 
 # model
 PRETRAINED_PATH: "audioset_tagging_cnn/Wavegram_Logmel_Cnn14_mAP=0.439.pth"
