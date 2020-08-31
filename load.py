@@ -37,7 +37,7 @@ def prepare_model(train, Model, ckpt_path, train_from, device):
             model.att_block = audioset_tagging_cnn.pytorch.models.AttBlock(
                 hidden_size, num_birds, activation='sigmoid')
         else:
-            model.fc_audioset = nn.Linear(hidden_size, num_birds, 'sigmoid')
+            model.fc_audioset = nn.Linear(hidden_size, num_birds)
 
         for name, param in model.named_parameters():
             if train_from in name:
