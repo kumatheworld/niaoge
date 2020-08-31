@@ -1,4 +1,5 @@
 import argparse
+import pprint
 import os
 import torch
 from sklearn.model_selection import train_test_split
@@ -22,6 +23,7 @@ def get_loader(df, cfg):
     return loader
 
 def train(cfg):
+    str_cfg = pprint.pformat(cfg)
     device = cfg['DEVICE']
     model = cfg['MODEL']
 
@@ -111,7 +113,7 @@ def train(cfg):
         if best_score <= val_score and not cfg['SANITY_CHECK']:
             best_score = val_score
             checkpoint = {
-                'config': str(cfg),
+                'config': str_cfg,
                 'epoch': epoch,
                 'model': model.state_dict()
             }
