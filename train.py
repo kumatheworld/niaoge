@@ -119,6 +119,8 @@ def train(cfg):
             }
             torch.save(checkpoint, cfg['CKPT_PATH'])
 
+    writer.close()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='default',
