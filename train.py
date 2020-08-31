@@ -51,6 +51,7 @@ def train(cfg):
     ckpt_dir = os.path.dirname(cfg['CKPT_PATH'])
     os.makedirs(ckpt_dir, exist_ok=True)
     writer = SummaryWriter()
+    writer.add_text('config', str_cfg.replace('\n', '  \n'))
 
     # start training!
     n_iter = 1
