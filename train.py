@@ -111,8 +111,9 @@ def train(cfg):
         if best_score <= val_score and not cfg['SANITY_CHECK']:
             best_score = val_score
             checkpoint = {
+                'config': str(cfg),
                 'epoch': epoch,
-                'model': model.state_dict(),
+                'model': model.state_dict()
             }
             torch.save(checkpoint, cfg['CKPT_PATH'])
 
