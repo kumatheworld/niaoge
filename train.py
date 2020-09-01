@@ -14,7 +14,7 @@ from dataset import BirdcallDataset
 import losses
 
 def get_loader(df, cfg):
-    dataset =  BirdcallDataset(df, cfg['LIKELIHOOD'], cfg['AUDIO_DURATION'])
+    dataset =  BirdcallDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'])
     kwargs = {
         'num_workers': cfg['NUM_WORKERS'],
         'pin_memory': True
