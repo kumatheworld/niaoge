@@ -36,11 +36,11 @@ class BirdcallDataset(Dataset):
         del(self.df)
 
     def _get_random_interval(self, bird_id):
-        '''
+        """
         Get random audio of bird_id
         and pick random interval of length self.duration.
         Return audio array of length self.sr * self.duration.
-        '''
+        """
         audio_file = random.choice(self.available_audios[bird_id])
         audio_path = os.path.join(self.train_audio_dir,
                                   self.bird_list[bird_id], audio_file)

@@ -49,10 +49,10 @@ def prepare_model(train, Model, ckpt_path, train_from, device):
     return model
 
 def set_config(config_name, train):
-    '''
+    """
     Load config and replace some string values with corresponding objects
     including device and model.
-    '''
+    """
 
     config_dir = 'configs'
     config_path = os.path.join(config_dir, config_name + '.yaml')
