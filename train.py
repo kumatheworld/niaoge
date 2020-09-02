@@ -43,7 +43,7 @@ def train(cfg):
         val_loader = None
 
     # prepare some more
-    criterion = getattr(losses, cfg['LOSS'])
+    criterion = getattr(losses, cfg['LOSS'])()
     optimizer = getattr(optim, cfg['OPTIM_ALGO'])(
         [param for param in model.parameters() if param.requires_grad],
         lr=cfg['LR']

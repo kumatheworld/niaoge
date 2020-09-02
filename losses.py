@@ -1,10 +1,20 @@
 import torch
-from torch.nn.functional import binary_cross_entropy
+from torch.nn import BCELoss
 
-def BCELoss(pred, label):
-    return binary_cross_entropy(pred, label)
+class SoftF1Loss_(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, pred, label):
+        inv_avg = 2 / torch.sum(pred + label, dim=-1, keepdim=True)
+        prod = torch.sum(pred * label, dim=-1, keepdim=True)
+        f1 = inv_avg * prod
+        grad_pred = inv_avg * (f1 - label)
+        ctx.save_for_backward(grad_pred)
+        return 1 - f1.mean()
 
-def SoftF1Loss(pred, label):
-    numerator = torch.sum(torch.abs(pred - label), dim=-1)
-    denominator = torch.sum(pred + label, dim=-1)
-    return torch.mean(numerator / denominator)
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_pred, = ctx.saved_tensors
+        return grad_pred * grad_output, None
+
+def SoftF1Loss():
+    return SoftF1Loss_.apply
