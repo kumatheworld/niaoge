@@ -19,7 +19,7 @@ def fix_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def prepare_model(train, Model, ckpt_path, train_from, device):
+def prepare_model(Model, ckpt_path, device, train=False, resume=False, train_from=None):
     # load a PANN model
     num_classes_audioset = 527
     num_birds = 264
@@ -27,18 +27,21 @@ def prepare_model(train, Model, ckpt_path, train_from, device):
     ckpt = torch.load(ckpt_path, map_location=device)
     model = Model(sample_rate=32000, window_size=1024,
                   hop_size=320, mel_bins=64, fmin=50, fmax=14000,
-                  classes_num=num_classes_audioset if train else num_birds)
+                  classes_num=num_classes_audioset \
+                  if train and not resume else num_birds)
     model.load_state_dict(ckpt['model'])
 
     if train:
-        hidden_size = 2048
-        # replace the final layer
-        if Model.__name__ == 'Cnn14_DecisionLevelAtt':
-            model.att_block = audioset_tagging_cnn.pytorch.models.AttBlock(
-                hidden_size, num_birds, activation='sigmoid')
-        else:
-            model.fc_audioset = nn.Linear(hidden_size, num_birds)
+        if not resume:
+            hidden_size = 2048
+            # replace the final layer
+            if Model.__name__ == 'Cnn14_DecisionLevelAtt':
+                model.att_block = audioset_tagging_cnn.pytorch.models.AttBlock(
+                    hidden_size, num_birds, activation='sigmoid')
+            else:
+                model.fc_audioset = nn.Linear(hidden_size, num_birds)
 
+        # freeze first few layers
         for name, param in model.named_parameters():
             if train_from in name:
                 break
@@ -68,8 +71,12 @@ def set_config(config_name, train):
     cfg['DEVICE'] = device
 
     Model = getattr(audioset_tagging_cnn.pytorch.models, cfg['MODEL'])
-    ckpt_path = cfg['PRETRAINED_PATH'] if train else cfg['CKPT_PATH']
-    model = prepare_model(train, Model, ckpt_path, cfg['TRAIN_FROM'], device)
+    halftrained_path = cfg['HALFTRAINED_PATH']
+    resume = halftrained_path != None
+    ckpt_path = (halftrained_path if resume else cfg['PRETRAINED_PATH']) \
+                if train else cfg['CKPT_PATH']
+    train_from = cfg['TRAIN_FROM']
+    model = prepare_model(Model, ckpt_path, device, train, resume, train_from)
     cfg['MODEL'] = model
 
     return cfg
