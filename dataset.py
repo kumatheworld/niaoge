@@ -58,7 +58,7 @@ class TrainDataset(Dataset):
         # rough length
         return self.len
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index):
         # NOTE: index not used since this is randomized!
 
         # determine number of labels based on likelihood
