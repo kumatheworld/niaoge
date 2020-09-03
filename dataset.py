@@ -4,7 +4,7 @@ import random
 import soundfile as sf
 import numpy as np
 
-class BirdcallDataset(Dataset):
+class TrainDataset(Dataset):
     def __init__(self, df, duration=5., likelihood=[0,1]):
         super().__init__()
         sr = 32000

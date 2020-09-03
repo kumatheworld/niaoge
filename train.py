@@ -10,11 +10,11 @@ from torch.utils.tensorboard import SummaryWriter
 
 from evaluate import binarize, mean_f1_score
 from load import set_config
-from dataset import BirdcallDataset
+from dataset import TrainDataset
 import losses
 
 def get_loader(df, cfg):
-    dataset =  BirdcallDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'])
+    dataset = TrainDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'])
     kwargs = {
         'num_workers': cfg['NUM_WORKERS'],
         'pin_memory': True
