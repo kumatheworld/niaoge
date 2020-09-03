@@ -2,6 +2,7 @@
 USE_CUDA: True
 MODEL: Wavegram_Logmel_Cnn14
 CKPT_PATH: "checkpoints/model.pth"
+PRED_THRESH: 0.5
 
 ## TRAIN ##
 # random seed
@@ -27,6 +28,5 @@ OPTIM_ALGO: Adam
 LR: 0.001
 
 ## TEST ##
-PRED_THRESH: 0.5
 WINDOW_SIZE: 5.0
 STRIDE: 5.0
