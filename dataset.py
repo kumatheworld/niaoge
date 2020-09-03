@@ -3,6 +3,9 @@ import os
 import random
 import soundfile as sf
 import numpy as np
+import pandas as pd
+import warnings
+import librosa
 
 class TrainDataset(Dataset):
     def __init__(self, df, duration=5., likelihood=[0,1]):
@@ -79,3 +82,48 @@ class TrainDataset(Dataset):
             audio_array = np.stack(audio_arrays).mean(0)
 
         return audio_array, few_hot_label
+
+class TestDataset(Dataset):
+    def __init__(self):
+        super().__init__()
+        data_dir = 'data'
+        self.sr = 32000
+
+        csv_path = os.path.join(data_dir, 'example_test_audio_summary.csv')
+        self.df = pd.read_csv(csv_path)
+        self.len = len(self.df)
+
+        df_last = self.df.drop_duplicates(subset=['filename'], keep='last')
+        durations = df_last['seconds'].values
+        audio_dir = os.path.join(data_dir, 'example_test_audio')
+        audio_arrays = [
+            self._get_audio_array(os.path.join(audio_dir, audio_file), duration)
+            for audio_file, duration in zip(os.listdir(audio_dir), durations)
+        ]
+        self.data = np.concatenate(audio_arrays).reshape(self.len, 5 * self.sr)
+
+        train_audio_dir = os.path.join(data_dir, 'train_audio')
+        self.bird_list = sorted(os.listdir(train_audio_dir))
+        self.num_birds = len(self.bird_list)
+        self.bird2id = {bird: idx for idx, bird in enumerate(self.bird_list)}
+        birds_lists = self.df['birds'].fillna('').values
+        self.label = np.stack([self._get_few_hot(birds) for birds in birds_lists])
+
+    def _get_audio_array(self, audio_path, duration):
+        warnings.simplefilter('ignore')
+        y, _ = librosa.load(audio_path, sr=self.sr, duration=duration)
+        warnings.resetwarnings()
+        return y
+
+    def _get_few_hot(self, birds):
+        few_hot = np.zeros(self.num_birds)
+        for bird in birds.split():
+            if bird in self.bird_list:
+                few_hot[self.bird2id[bird]] = 1
+        return few_hot
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, index):
+        return self.data[index], self.label[index]
