@@ -5,7 +5,7 @@ import numpy as np
 
 from load import set_config
 from dataset import TestDataset
-from evaluate import binarize, mean_f1_score
+from evaluate import mean_f1_score
 
 def test(cfg):
     dataset = TestDataset()
@@ -31,8 +31,7 @@ def test(cfg):
     label = dataset.label
     thresholds = np.linspace(0, 1, 101)
     for threshold in thresholds:
-        pred_bin = binarize(pred, threshold)
-        score = mean_f1_score(label, pred_bin)
+        score = mean_f1_score(pred, label, threshold)
         print(threshold, score)
 
 if __name__ == '__main__':

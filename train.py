@@ -7,7 +7,7 @@ import pandas as pd
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from evaluate import binarize, mean_f1_score
+from evaluate import mean_f1_score
 from load import set_config
 from dataset import TrainDataset
 import losses
@@ -68,8 +68,7 @@ def train(cfg):
             optimizer.step()
 
             loss_item = loss.item()
-            pred_bin = binarize(pred, cfg['PRED_THRESH'])
-            score = mean_f1_score(label, pred_bin)
+            score = mean_f1_score(pred, label, cfg['PRED_THRESH'])
 
             writer.add_scalar('loss/train', loss_item, n_iter)
             writer.add_scalar('score/train', score, n_iter)
@@ -96,8 +95,7 @@ def train(cfg):
 
                     pred = model(data)['clipwise_output']
                     val_loss += criterion(pred, label).item()
-                    pred_bin = binarize(pred, cfg['PRED_THRESH'])
-                    val_score += mean_f1_score(label, pred_bin)
+                    val_score += mean_f1_score(pred, label, cfg['PRED_THRESH'])
 
             val_loss /= len(val_loader)
             val_score /= len(val_loader)
