@@ -44,8 +44,6 @@ def train(cfg):
     # prepare some more
     criterion = getattr(losses, cfg['LOSS'])()
     optimizer = cfg['OPTIMIZER']
-    ckpt_dir = os.path.dirname(cfg['CKPT_PATH'])
-    os.makedirs(ckpt_dir, exist_ok=True)
     writer = SummaryWriter()
     writer.add_text('config', str_cfg.replace('\n', '  \n'))
 
