@@ -4,6 +4,7 @@ import numpy as np
 import yaml
 import torch
 import torch.nn as nn
+import torch.optim as optim
 
 # dirty hack to get PANNs to work without changing code
 import sys
@@ -78,5 +79,15 @@ def set_config(config_name, train):
     train_from = cfg['TRAIN_FROM']
     model = prepare_model(Model, ckpt_path, device, train, resume, train_from)
     cfg['MODEL'] = model
+
+    if train:
+        optimizer = getattr(optim, cfg['OPTIMIZER'])(
+            [param for param in model.parameters() if param.requires_grad],
+            lr=cfg['LR']
+        )
+        cfg['OPTIMIZER'] = optimizer
+        if resume:
+            ckpt = torch.load(ckpt_path, map_location=device)
+            optimizer.load_state_dict(ckpt['optimizer'])
 
     return cfg

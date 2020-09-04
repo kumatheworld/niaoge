@@ -5,7 +5,6 @@ import torch
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from torch.utils.data import DataLoader
-import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 from evaluate import binarize, mean_f1_score
@@ -44,10 +43,7 @@ def train(cfg):
 
     # prepare some more
     criterion = getattr(losses, cfg['LOSS'])()
-    optimizer = getattr(optim, cfg['OPTIM_ALGO'])(
-        [param for param in model.parameters() if param.requires_grad],
-        lr=cfg['LR']
-    )
+    optimizer = cfg['OPTIMIZER']
     ckpt_dir = os.path.dirname(cfg['CKPT_PATH'])
     os.makedirs(ckpt_dir, exist_ok=True)
     writer = SummaryWriter()
@@ -116,7 +112,8 @@ def train(cfg):
             checkpoint = {
                 'config': str_cfg,
                 'epoch': epoch,
-                'model': model.state_dict()
+                'model': model.state_dict(),
+                'optimizer': optimizer.state_dict()
             }
             torch.save(checkpoint, cfg['CKPT_PATH'])
 
