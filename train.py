@@ -7,10 +7,9 @@ import pandas as pd
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from evaluate import mean_f1_score
 from load import set_config
 from dataset import TrainDataset
-import losses
+from evaluate import mean_f1_score
 
 def get_loader(df, cfg):
     dataset = TrainDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'])
@@ -42,7 +41,7 @@ def train(cfg):
         val_loader = None
 
     # prepare some more
-    criterion = getattr(losses, cfg['LOSS'])()
+    criterion = cfg['LOSS']
     optimizer = cfg['OPTIMIZER']
     writer = SummaryWriter()
     writer.add_text('config', str_cfg.replace('\n', '  \n'))

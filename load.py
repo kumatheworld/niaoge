@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+import losses
+
 # dirty hack to get PANNs to work without changing code
 import sys
 sys.path.append('audioset_tagging_cnn/pytorch')
@@ -81,6 +83,8 @@ def set_config(config_name, train):
     cfg['MODEL'] = model
 
     if train:
+        cfg['LOSS'] = getattr(losses, cfg['LOSS'])()
+
         optimizer = getattr(optim, cfg['OPTIMIZER'])(
             [param for param in model.parameters() if param.requires_grad],
             lr=cfg['LR']
