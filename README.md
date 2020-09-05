@@ -15,7 +15,8 @@
 * Watch training progress by ```tensorboard --logdir runs```.
 
 ### Test
-* Will be out soon!
+* Run ```python test.py``` to check out how different thresholds affect the F1-score.
+  * Actually, the test data is such a garbage that you'll end up seeing score monotonically increase w.r.t. threshold unless your model is very-well trained!
 
 ### TODO
 * Get more juice out of data!
