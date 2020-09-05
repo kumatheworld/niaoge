@@ -22,17 +22,17 @@ def fix_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def prepare_model(Model, ckpt_path, device, train=False, resume=False, train_from=None):
+def prepare_model(Model, state_dict, device,
+                  train=False, resume=False, train_from=None):
     # load a PANN model
     num_classes_audioset = 527
     num_birds = 264
 
-    ckpt = torch.load(ckpt_path, map_location=device)
     model = Model(sample_rate=32000, window_size=1024,
                   hop_size=320, mel_bins=64, fmin=50, fmax=14000,
                   classes_num=num_classes_audioset \
                   if train and not resume else num_birds)
-    model.load_state_dict(ckpt['model'])
+    model.load_state_dict(state_dict)
 
     if train:
         if not resume:
@@ -78,8 +78,10 @@ def set_config(config_name, train):
     resume = halftrained_path != None
     ckpt_path = (halftrained_path if resume else cfg['PRETRAINED_PATH']) \
                 if train else cfg['CKPT_PATH']
+    ckpt = torch.load(ckpt_path, map_location=device)
+    state_dict = ckpt['model']
     train_from = cfg['TRAIN_FROM']
-    model = prepare_model(Model, ckpt_path, device, train, resume, train_from)
+    model = prepare_model(Model, state_dict, device, train, resume, train_from)
     cfg['MODEL'] = model
 
     if train:
@@ -89,9 +91,8 @@ def set_config(config_name, train):
             [param for param in model.parameters() if param.requires_grad],
             lr=cfg['LR']
         )
-        cfg['OPTIMIZER'] = optimizer
         if resume:
-            ckpt = torch.load(ckpt_path, map_location=device)
             optimizer.load_state_dict(ckpt['optimizer'])
+        cfg['OPTIMIZER'] = optimizer
 
     return cfg
