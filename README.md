@@ -11,6 +11,7 @@
 
 ### Train
 * Run ```python train.py```.
+  * This reads ```configs/default.yaml``` by default. You can tweek hyperparameters either by editing ```configs/default.yaml``` or by creating a new YAML file ```configs/xxx.yaml``` and execute ```python train.py --config xxx``` instead.
 * Watch training progress by ```tensorboard --logdir runs```.
 
 ### Test
