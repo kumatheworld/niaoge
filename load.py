@@ -22,20 +22,17 @@ def fix_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def prepare_model(Model, state_dict, device,
-                  train=False, resume=False, train_from=None):
+def prepare_model(Model, state_dict, device, train=False, train_from=None):
     # load a PANN model
-    num_classes_audioset = 527
-    num_birds = 264
-
-    model = Model(sample_rate=32000, window_size=1024,
-                  hop_size=320, mel_bins=64, fmin=50, fmax=14000,
-                  classes_num=num_classes_audioset \
-                  if train and not resume else num_birds)
+    classes_num = state_dict[next(reversed(state_dict.keys()))].size(0)
+    model = Model(sample_rate=32000, window_size=1024, hop_size=320,
+                  mel_bins=64, fmin=50, fmax=14000, classes_num=classes_num)
     model.load_state_dict(state_dict)
 
+    state_dict[next(reversed(state_dict.keys()))].size(0)
     if train:
-        if not resume:
+        num_birds = 264
+        if classes_num != num_birds:
             hidden_size = 2048
             # replace the final layer
             if Model.__name__ == 'Cnn14_DecisionLevelAtt':
@@ -49,6 +46,8 @@ def prepare_model(Model, state_dict, device,
             if train_from in name:
                 break
             param.requires_grad = False
+        else:
+            raise Exception(f'layer {train_from} not found')
 
     model.to(device)
 
@@ -75,13 +74,12 @@ def set_config(config_name, train):
 
     Model = getattr(audioset_tagging_cnn.pytorch.models, cfg['MODEL'])
     halftrained_path = cfg['HALFTRAINED_PATH']
-    resume = halftrained_path != None
-    ckpt_path = (halftrained_path if resume else cfg['PRETRAINED_PATH']) \
+    ckpt_path = (halftrained_path if halftrained_path else cfg['PRETRAINED_PATH']) \
                 if train else cfg['CKPT_PATH']
     ckpt = torch.load(ckpt_path, map_location=device)
     state_dict = ckpt['model']
     train_from = cfg['TRAIN_FROM']
-    model = prepare_model(Model, state_dict, device, train, resume, train_from)
+    model = prepare_model(Model, state_dict, device, train, train_from)
     cfg['MODEL'] = model
 
     if train:
@@ -91,7 +89,7 @@ def set_config(config_name, train):
             [param for param in model.parameters() if param.requires_grad],
             lr=cfg['LR']
         )
-        if resume:
+        if cfg['RESUME']:
             optimizer.load_state_dict(ckpt['optimizer'])
         cfg['OPTIMIZER'] = optimizer
 
