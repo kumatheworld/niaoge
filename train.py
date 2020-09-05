@@ -12,7 +12,7 @@ from dataset import TrainDataset
 from evaluate import mean_f1_score
 
 def get_loader(df, cfg):
-    dataset = TrainDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'])
+    dataset = TrainDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'], cfg['NOISE'])
     kwargs = {
         'num_workers': cfg['NUM_WORKERS'],
         'pin_memory': True

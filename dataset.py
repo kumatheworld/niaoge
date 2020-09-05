@@ -8,11 +8,13 @@ import warnings
 import librosa
 
 class TrainDataset(Dataset):
-    def __init__(self, df, duration=5., likelihood=[0,1]):
+    def __init__(self, df, duration=5., likelihood=[0,1], noise=None):
         super().__init__()
         sr = 32000
         self.num_frames = int(sr * duration)
         self.likelihood = likelihood
+        self.noise = noise
+
         self.len = len(df)
         self.train_audio_dir = os.path.join('data', 'train_audio')
         self.bird_list = sorted(os.listdir(self.train_audio_dir))
@@ -80,6 +82,9 @@ class TrainDataset(Dataset):
                 few_hot_label[bird_idx] = 1
             audio_arrays = [self._get_random_interval(bird_idx) for bird_idx in labels]
             audio_array = np.stack(audio_arrays).mean(0)
+
+        if self.noise:
+            audio_array += self.noise * np.random.randn(self.num_frames)
 
         return audio_array, few_hot_label
 
