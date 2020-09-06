@@ -26,7 +26,11 @@ LOSS: BCELoss
 BATCH_SIZE: 32
 EPOCHS: 1000
 OPTIMIZER: Adam
-LR: 0.001
+LR:
+  LR: 0.001
+  SCHEDULER: ExponentialLR
+  KWARGS:
+    gamma: 1.
 RESUME: False
 
 ## TEST ##

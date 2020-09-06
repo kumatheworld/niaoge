@@ -43,6 +43,7 @@ def train(cfg):
     # prepare some more
     criterion = cfg['LOSS']
     optimizer = cfg['OPTIMIZER']
+    scheduler = cfg['LR']['SCHEDULER']
     writer = SummaryWriter()
     writer.add_text('config', str_cfg.replace('\n', '  \n'))
 
@@ -101,6 +102,8 @@ def train(cfg):
             writer.add_scalars('score/train & val',
                             {'train': train_score, 'val': val_score}, epoch)
 
+        scheduler.step()
+
         # save model
         if best_score <= val_score and not cfg['SANITY_CHECK']:
             best_score = val_score
@@ -108,7 +111,8 @@ def train(cfg):
                 'config': str_cfg,
                 'epoch': epoch,
                 'model': model.state_dict(),
-                'optimizer': optimizer.state_dict()
+                'optimizer': optimizer.state_dict(),
+                'scheduler': scheduler.state_dict(),
             }
             torch.save(checkpoint, cfg['CKPT_PATH'])
 

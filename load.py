@@ -87,10 +87,18 @@ def set_config(config_name, train):
 
         optimizer = getattr(optim, cfg['OPTIMIZER'])(
             [param for param in model.parameters() if param.requires_grad],
-            lr=cfg['LR']
+            lr=cfg['LR']['LR']
         )
         if cfg['RESUME']:
             optimizer.load_state_dict(ckpt['optimizer'])
         cfg['OPTIMIZER'] = optimizer
+
+        scheduler = getattr(optim.lr_scheduler, cfg['LR']['SCHEDULER'])(
+            optimizer,
+            **cfg['LR']['KWARGS']
+        )
+        if cfg['RESUME']:
+            scheduler.load_state_dict(ckpt['scheduler'])
+        cfg['LR']['SCHEDULER'] = scheduler
 
     return cfg
