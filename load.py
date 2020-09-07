@@ -29,7 +29,6 @@ def prepare_model(Model, state_dict, device, train=False, train_from=None):
                   mel_bins=64, fmin=50, fmax=14000, classes_num=classes_num)
     model.load_state_dict(state_dict)
 
-    state_dict[next(reversed(state_dict.keys()))].size(0)
     if train:
         num_birds = 264
         if classes_num != num_birds:
