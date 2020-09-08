@@ -42,7 +42,7 @@ def prepare_model(Model, state_dict, device, train=False, train_from=None):
 
         # freeze first few layers
         for name, param in model.named_parameters():
-            if train_from in name:
+            if name.startswith(train_from):
                 break
             param.requires_grad = False
         else:
