@@ -33,7 +33,7 @@ def train(cfg):
         df = df.drop_duplicates(subset=['ebird_code'])
 
     if cfg['VALIDATION']:
-        train_df, test_df = train_test_split(df)
+        train_df, test_df = train_test_split(df, random_state=cfg['SEED'])
         train_loader = get_loader(train_df, cfg)
         val_loader = get_loader(test_df, cfg)
     else:
