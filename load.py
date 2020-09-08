@@ -24,7 +24,9 @@ def fix_seed(seed):
 
 def prepare_model(Model, state_dict, device, train=False, train_from=None):
     # load a PANN model
-    classes_num = state_dict[next(reversed(state_dict.keys()))].size(0)
+    classes_num = [
+        b.size(0) for name, b in state_dict.items() if name.endswith('.bias')
+    ][-1]
     model = Model(sample_rate=32000, window_size=1024, hop_size=320,
                   mel_bins=64, fmin=50, fmax=14000, classes_num=classes_num)
     model.load_state_dict(state_dict)
