@@ -11,14 +11,14 @@ SEED:
 # model
 HALFTRAINED_PATH:
 PRETRAINED_PATH: "audioset_tagging_cnn/Wavegram_Logmel_Cnn14_mAP=0.439.pth"
-TRAIN_FROM: conv_block4
+TRAIN_FROM: conv_block1
 
 # dataset
 VALIDATION: False
 SANITY_CHECK: True
 LIKELIHOOD: [0, 1, 1]
 AUDIO_DURATION: 5.0
-NOISE: 0.001
+NOISE: 0.00001
 
 # optimization
 NUM_WORKERS: 4
