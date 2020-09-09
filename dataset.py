@@ -10,8 +10,8 @@ import librosa
 class TrainDataset(Dataset):
     def __init__(self, df, duration=5., likelihood=[0,1], noise=None):
         super().__init__()
-        sr = 32000
-        self.num_frames = int(sr * duration)
+        self.sr = 32000
+        self.num_frames = int(self.sr * duration)
         self.likelihood = likelihood
         self.noise = noise
 
@@ -22,9 +22,9 @@ class TrainDataset(Dataset):
 
         # get list of list of available audio files from df
         self.available_audios = [
-            [os.path.splitext(file)[0] + '.wav'
-                for file in df.loc[df['ebird_code']==bird, 'filename']]
-            for bird in self.bird_list
+            [self._get_audio_info(bird_id, mp3)
+                for mp3 in df.loc[df['ebird_code']==bird, 'filename']]
+            for bird_id, bird in enumerate(self.bird_list)
         ]
 
         # get available bird ids from df
@@ -33,29 +33,41 @@ class TrainDataset(Dataset):
             idx for idx in range(self.num_birds) if self.available_audios[idx]
         ]
 
+    def _get_audio_info(self, bird_id, mp3_file):
+        audio_file = os.path.splitext(mp3_file)[0] + '.wav'
+        audio_path = os.path.join(self.train_audio_dir,
+                                  self.bird_list[bird_id], audio_file)
+        y, sr = sf.read(audio_path)
+        assert sr == self.sr, f'sample rate {self.sr} expected but {sr} found'
+        num_frames = len(y)
+
+        audio_info = {
+            'audio_path': audio_path,
+            'num_frames': num_frames
+        }
+        return audio_info
+
     def _get_random_interval(self, bird_id):
         """
         Get random audio of bird_id pick random interval.
         Return audio array of length self.num_frames.
         """
-        audio_file = random.choice(self.available_audios[bird_id])
-        audio_path = os.path.join(self.train_audio_dir,
-                                  self.bird_list[bird_id], audio_file)
-        y, _ = sf.read(audio_path, dtype='float32')
+        audio_info = random.choice(self.available_audios[bird_id])
+        audio_path = audio_info['audio_path']
+        num_frames = audio_info['num_frames']
 
-        num_frames = len(y)
         if num_frames < self.num_frames:
-            # pad y with zeros
-            new_y = np.zeros(self.num_frames, dtype=y.dtype)
-            start = np.random.randint(self.num_frames - num_frames)
+            # pad with zeros
+            y = np.zeros(self.num_frames, dtype='float32')
+            start = np.random.randint(self.num_frames - num_frames + 1)
             end = start + num_frames
-            new_y[start:end] = y
-            y = new_y
-        elif num_frames > self.num_frames:
-            # trim y
-            start = np.random.randint(num_frames - self.num_frames)
+            y[start:end] = sf.read(audio_path, dtype='float32')[0]
+        else:
+            # trim
+            start = np.random.randint(num_frames - self.num_frames + 1)
             end = start + self.num_frames
-            y = y[start:end]
+            y = sf.read(audio_path, dtype='float32',
+                        frames=self.num_frames, start=start)[0]
 
         return y
 
