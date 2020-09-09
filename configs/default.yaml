@@ -6,7 +6,7 @@ PRED_THRESH: 0.5
 
 ## TRAIN ##
 # random seed
-SEED:
+SEED: 0
 
 # model
 HALFTRAINED_PATH:
