@@ -6,7 +6,7 @@
     ffmpeg -i $audio -ar 32000 -ac 1 ${audio%.mp3}.wav
   done
   ```
-* Download a whatever PANN pretrained model from [here](https://zenodo.org/record/3987831#.X0j3PdMzblw) and put it under `audioset_tagging_cnn/`. Modify `configs/default.yaml` accordingly. If your downloaded model is `Wavegram_Logmel_Cnn14_mAP=0.439.pth`, you don't have to edit the config file.
+* Download a whatever PANN pretrained model from https://zenodo.org/record/3987831#.X0j3PdMzblw and put it under `audioset_tagging_cnn/`. Modify `configs/default.yaml` accordingly. If your downloaded model is `Wavegram_Logmel_Cnn14_mAP=0.439.pth`, you don't have to edit the config file.
 * Install packages by ```pip install -r requirements.txt```.
 
 ### Train
@@ -19,8 +19,4 @@
   * Actually, the test data is such a garbage that you'll end up seeing score monotonically increase w.r.t. threshold unless your model is very-well trained!
 
 ### TODO
-* Get more juice out of data!
-    * Roughly estimate a bird singing or not during a given interval
-    * Augmentation
-    * Respect co-occurrence of birds
-    * Current audio mix/padding correct?
+* Add nocall data?
