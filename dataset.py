@@ -20,11 +20,11 @@ class TrainDataset(Dataset):
         self.bird_list = sorted(os.listdir(self.train_audio_dir))
         self.num_birds = len(self.bird_list)
 
-        # get list of list of available audio files from df
+        # get list of list of available audios from df
         self.available_audios = [
-            [self._get_audio_info(bird_id, mp3)
-                for mp3 in df.loc[df['ebird_code']==bird, 'filename']]
-            for bird_id, bird in enumerate(self.bird_list)
+            [self._get_audio_info(bird_id, row['filename'], row['num_frames'])
+             for _, row in df.loc[df['ebird_code']==bird].iterrows()
+            ] for bird_id, bird in enumerate(self.bird_list)
         ]
 
         # get available bird ids from df
@@ -33,14 +33,10 @@ class TrainDataset(Dataset):
             idx for idx in range(self.num_birds) if self.available_audios[idx]
         ]
 
-    def _get_audio_info(self, bird_id, mp3_file):
+    def _get_audio_info(self, bird_id, mp3_file, num_frames):
         audio_file = os.path.splitext(mp3_file)[0] + '.wav'
         audio_path = os.path.join(self.train_audio_dir,
                                   self.bird_list[bird_id], audio_file)
-        y, sr = sf.read(audio_path)
-        assert sr == self.sr, f'sample rate {self.sr} expected but {sr} found'
-        num_frames = len(y)
-
         audio_info = {
             'audio_path': audio_path,
             'num_frames': num_frames
