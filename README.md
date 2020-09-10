@@ -6,6 +6,7 @@
     ffmpeg -i $audio -ar 32000 -ac 1 ${audio%.mp3}.wav
   done
   ```
+* Run ```python preprocess.py```. This will add a new column ```num_frames``` to ```data/train.csv```.
 * Download a whatever PANN pretrained model from https://zenodo.org/record/3987831#.X0j3PdMzblw and put it under `audioset_tagging_cnn/`. Modify `configs/default.yaml` accordingly. If your downloaded model is `Wavegram_Logmel_Cnn14_mAP=0.439.pth`, you don't have to edit the config file.
 * Install packages by ```pip install -r requirements.txt```.
 
