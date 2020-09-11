@@ -38,7 +38,7 @@ def test(cfg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default='default',
-                        help='YAML file name under config/')
+                        help='YAML file name under configs/')
     args = parser.parse_args()
 
     cfg = Config(args.config, train=False)
