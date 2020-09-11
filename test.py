@@ -13,7 +13,7 @@ def test(cfg):
         'num_workers': cfg['NUM_WORKERS'],
         'pin_memory': True
     } if cfg['USE_CUDA'] else {}
-    loader = DataLoader(dataset, cfg['BATCH_SIZE'], kwargs)
+    loader = DataLoader(dataset, cfg['BATCH_SIZE'], **kwargs)
 
     device = cfg['DEVICE']
     model = cfg['MODEL']
