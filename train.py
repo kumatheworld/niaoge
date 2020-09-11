@@ -22,6 +22,7 @@ def get_loader(df, cfg):
 def train(cfg):
     device = cfg.DEVICE
     model = cfg.MODEL
+    model.to(device)
 
     # prepare loaders
     train_csv = os.path.join('data', 'train.csv')

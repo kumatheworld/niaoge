@@ -25,7 +25,7 @@ def fix_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def prepare_model(Model, state_dict, device, train=False, train_from=None):
+def prepare_model(Model, state_dict, train=False, train_from=None):
     # load a PANN model
     classes_num = [
         b.size(0) for name, b in state_dict.items() if name.endswith('.bias')
@@ -53,8 +53,6 @@ def prepare_model(Model, state_dict, device, train=False, train_from=None):
         else:
             raise Exception(f'layer {train_from} not found')
 
-    model.to(device)
-
     return model
 
 class Config():
@@ -79,13 +77,11 @@ class Config():
         self.DEVICE = device
 
         Model = getattr(audioset_tagging_cnn.pytorch.models, self.MODEL)
-        halftrained_path = self.HALFTRAINED_PATH
-        ckpt_path = (halftrained_path if halftrained_path else self.PRETRAINED_PATH) \
+        ht_path = self.HALFTRAINED_PATH
+        ckpt_path = (ht_path if ht_path else self.PRETRAINED_PATH) \
                     if train else self.CKPT_PATH
         ckpt = torch.load(ckpt_path, map_location=device)
-        state_dict = ckpt['model']
-        train_from = self.TRAIN_FROM
-        model = prepare_model(Model, state_dict, device, train, train_from)
+        model = prepare_model(Model, ckpt['model'], train, self.TRAIN_FROM)
         self.MODEL = model
 
         if train:
