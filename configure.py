@@ -13,7 +13,7 @@ import losses
 # dirty hack to get PANNs to work without changing code
 import sys
 sys.path.append('audioset_tagging_cnn/pytorch')
-import audioset_tagging_cnn.pytorch.models
+import audioset_tagging_cnn.pytorch.models as models
 
 def fix_seed(seed):
     os.environ.PYTHONHASHSEED = str(seed)
@@ -40,8 +40,8 @@ def prepare_model(Model, state_dict, train=False, train_from=None):
             # replace the final layer
             hidden_size = 2048
             if Model.__name__ == 'Cnn14_DecisionLevelAtt':
-                model.att_block = audioset_tagging_cnn.pytorch.models.AttBlock(
-                    hidden_size, num_birds, activation='sigmoid')
+                model.att_block = models.AttBlock(hidden_size, num_birds,
+                                                  activation='sigmoid')
             else:
                 model.fc_audioset = nn.Linear(hidden_size, num_birds)
 
@@ -76,7 +76,7 @@ class Config():
         self.USE_CUDA = use_cuda
         self.DEVICE = device
 
-        Model = getattr(audioset_tagging_cnn.pytorch.models, self.MODEL)
+        Model = getattr(models, self.MODEL)
         ht_path = self.HALFTRAINED_PATH
         ckpt_path = (ht_path if ht_path else self.PRETRAINED_PATH) \
                     if train else self.CKPT_PATH
