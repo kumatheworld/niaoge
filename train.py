@@ -1,5 +1,4 @@
 import argparse
-import pprint
 import os
 import torch
 from sklearn.model_selection import train_test_split
@@ -7,33 +6,32 @@ import pandas as pd
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from load import set_config
+from configure import Config
 from dataset import TrainDataset
 from evaluate import mean_f1_score
 
 def get_loader(df, cfg):
-    dataset = TrainDataset(df, cfg['AUDIO_DURATION'], cfg['LIKELIHOOD'], cfg['NOISE'])
+    dataset = TrainDataset(df, cfg.AUDIO_DURATION, cfg.LIKELIHOOD, cfg.NOISE)
     kwargs = {
-        'num_workers': cfg['NUM_WORKERS'],
+        'num_workers': cfg.NUM_WORKERS,
         'pin_memory': True
-    } if cfg['USE_CUDA'] else {}
-    loader = DataLoader(dataset, cfg['BATCH_SIZE'], **kwargs, drop_last=True)
+    } if cfg.USE_CUDA else {}
+    loader = DataLoader(dataset, cfg.BATCH_SIZE, **kwargs, drop_last=True)
     return loader
 
 def train(cfg):
-    str_cfg = pprint.pformat(cfg)
-    device = cfg['DEVICE']
-    model = cfg['MODEL']
+    device = cfg.DEVICE
+    model = cfg.MODEL
 
     # prepare loaders
     train_csv = os.path.join('data', 'train.csv')
     df = pd.read_csv(train_csv)
 
-    if cfg['SANITY_CHECK']:
+    if cfg.SANITY_CHECK:
         df = df.drop_duplicates(subset=['ebird_code'])
 
-    if cfg['VALIDATION']:
-        train_df, test_df = train_test_split(df, random_state=cfg['SEED'])
+    if cfg.VALIDATION:
+        train_df, test_df = train_test_split(df, random_state=cfg.SEED)
         train_loader = get_loader(train_df, cfg)
         val_loader = get_loader(test_df, cfg)
     else:
@@ -41,16 +39,16 @@ def train(cfg):
         val_loader = None
 
     # prepare some more
-    criterion = cfg['LOSS']
-    optimizer = cfg['OPTIMIZER']
-    scheduler = cfg['LR']['SCHEDULER']
-    writer = SummaryWriter()
-    writer.add_text('config', str_cfg.replace('\n', '  \n'))
+    criterion = cfg.LOSS
+    optimizer = cfg.OPTIMIZER
+    scheduler = cfg.LR.SCHEDULER
+    writer = SummaryWriter(comment=f'-{cfg.name}')
+    writer.add_text('config', cfg.get_markdown_string())
 
     # start training!
     n_iter = 1
     best_score = 0
-    for epoch in range(1, cfg['EPOCHS'] + 1):
+    for epoch in range(1, cfg.EPOCHS + 1):
         # train
         model.train()
         train_loss = 0
@@ -66,14 +64,14 @@ def train(cfg):
             optimizer.step()
 
             loss_item = loss.item()
-            score = mean_f1_score(pred, label, cfg['PRED_THRESH'])
+            score = mean_f1_score(pred, label, cfg.PRED_THRESH)
 
             writer.add_scalar('loss/train', loss_item, n_iter)
             writer.add_scalar('score/train', score, n_iter)
             train_loss += loss_item
             train_score += score
 
-            if cfg['SANITY_CHECK']:
+            if cfg.SANITY_CHECK:
                 print(n_iter, loss_item, score)
 
             n_iter += 1
@@ -84,7 +82,7 @@ def train(cfg):
         # validate
         val_score = 0
         val_loss = 0
-        if cfg['VALIDATION']:
+        if cfg.VALIDATION:
             model.eval()
             with torch.no_grad():
                 for data, label in val_loader:
@@ -93,7 +91,7 @@ def train(cfg):
 
                     pred = model(data)['clipwise_output']
                     val_loss += criterion(pred, label).item()
-                    val_score += mean_f1_score(pred, label, cfg['PRED_THRESH'])
+                    val_score += mean_f1_score(pred, label, cfg.PRED_THRESH)
 
             val_loss /= len(val_loader)
             val_score /= len(val_loader)
@@ -105,16 +103,16 @@ def train(cfg):
         scheduler.step()
 
         # save model
-        if best_score <= val_score and not cfg['SANITY_CHECK']:
+        if best_score <= val_score and not cfg.SANITY_CHECK:
             best_score = val_score
             checkpoint = {
-                'config': str_cfg,
+                'config': cfg.cfg,
                 'epoch': epoch,
                 'model': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
                 'scheduler': scheduler.state_dict(),
             }
-            torch.save(checkpoint, cfg['CKPT_PATH'])
+            torch.save(checkpoint, cfg.CKPT_PATH)
 
     writer.close()
 
@@ -124,5 +122,5 @@ if __name__ == '__main__':
                         help='YAML file name under configs/')
     args = parser.parse_args()
 
-    cfg = set_config(args.config, train=True)
+    cfg = Config(args.config, train=True)
     train(cfg)
