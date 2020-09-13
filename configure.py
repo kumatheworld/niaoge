@@ -51,7 +51,7 @@ def prepare_model(Model, state_dict, train=False, train_from=None):
                 break
             param.requires_grad = False
         else:
-            raise Exception(f'layer {train_from} not found')
+            raise Exception(f"layer '{train_from}' not found")
 
     return model
 

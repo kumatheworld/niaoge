@@ -7,7 +7,7 @@ def get_num_frames(train_audio_dir, bird, mp3_file):
     audio_path = os.path.join(train_audio_dir, bird, audio_file)
 
     y, sr = sf.read(audio_path)
-    assert sr == 32000, f'sample rate 32000 expected but {sr} found'
+    assert sr == 32000, f"sample rate 32000 expected but {sr} found"
 
     num_frames = len(y)
     return num_frames
