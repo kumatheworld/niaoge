@@ -25,7 +25,7 @@ def fix_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def prepare_model(Model, state_dict, train=False, train_from=None):
+def prepare_model(Model, state_dict, train, train_from):
     # load a PANN model
     classes_num = [
         b.size(0) for name, b in state_dict.items() if name.endswith('.bias')
