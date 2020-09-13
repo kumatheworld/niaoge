@@ -113,4 +113,5 @@ class Config():
             self.LR.SCHEDULER = scheduler
 
     def get_markdown_string(self):
+        """Return markdown-ready string for tensorboard logging."""
         return f'<pre>{self.str}</pre>'
