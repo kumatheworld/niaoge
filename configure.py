@@ -57,6 +57,14 @@ def prepare_model(Model, state_dict, train, train_from):
 
 class Config():
     def __init__(self, config_name, train):
+        """
+        Set up everything for experiment.
+        1. Load config file to self.cfg and attributify it.
+           (e.g. self.XXX equals self.cfg['XXX'].)
+        2. Set seed for reproducibility.
+        3. Overwrite attributes (device, model, optimizer, etc.)
+           by corresponding python objects.
+        """
         self.name = config_name
         config_dir = 'configs'
         config_path = os.path.join(config_dir, config_name + '.yaml')
