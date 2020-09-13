@@ -17,7 +17,6 @@ def test(cfg):
 
     device = cfg.DEVICE
     model = cfg.MODEL
-    model.to(device)
 
     model.eval()
     predictions = []

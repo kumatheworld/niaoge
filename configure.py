@@ -82,6 +82,7 @@ class Config():
                     if train else self.CKPT_PATH
         ckpt = torch.load(ckpt_path, map_location=device)
         model = prepare_model(Model, ckpt['model'], train, self.TRAIN_FROM)
+        model.to(device)
         self.MODEL = model
 
         if train:
