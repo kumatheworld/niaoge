@@ -16,7 +16,6 @@ sys.path.append('audioset_tagging_cnn/pytorch')
 import audioset_tagging_cnn.pytorch.models as models
 
 def fix_seed(seed):
-    os.environ.PYTHONHASHSEED = str(seed)
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
