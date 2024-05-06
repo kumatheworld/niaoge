@@ -49,4 +49,4 @@ threadpoolctl==2.1.0
 torch==1.13.1
 torchlibrosa==0.0.4
 urllib3==1.26.5
-Werkzeug==2.2.3
+Werkzeug==3.0.3
