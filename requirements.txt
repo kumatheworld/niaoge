@@ -12,7 +12,7 @@ future==0.18.3
 google-auth==1.21.0
 google-auth-oauthlib==0.4.1
 grpcio==1.53.2
-idna==2.10
+idna==3.7
 joblib==1.2.0
 kiwisolver==1.2.0
 librosa==0.8.0
